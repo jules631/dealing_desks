@@ -1,0 +1,14 @@
+{
+  "name": "ai-deal-desk-assistant",
+  "version": "1.0.0",
+  "description": "AI Deal Desk Assistant — turn messy sales conversations into structured, approvable quote submissions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "express": "^4.18.2"
+  }
+}
