@@ -37,6 +37,24 @@ function loadExample(n) {
   const ta = document.getElementById('conversationInput');
   ta.value = EXAMPLES[n];
   ta.focus();
+  clearInlineValidation();
+}
+
+/* ── Inline validation ──────────────────────────────────────────────────── */
+function showInlineValidation(msg) {
+  let el = document.getElementById('convValidation');
+  if (!el) {
+    el = document.createElement('p');
+    el.id = 'convValidation';
+    el.style.cssText = 'font-size:13px;font-weight:300;color:var(--red);margin-top:8px;line-height:1.5;';
+    document.getElementById('analyzeBtn')?.insertAdjacentElement('afterend', el);
+  }
+  el.textContent = msg;
+}
+
+function clearInlineValidation() {
+  const el = document.getElementById('convValidation');
+  if (el) el.textContent = '';
 }
 
 /* ── Loading Steps ─────────────────────────────────────────────────────── */
@@ -81,6 +99,9 @@ function showLoading() {
   if (rightEmpty) rightEmpty.style.display = 'flex';
   if (rightResults) rightResults.style.display = 'none';
 
+  // Hide simulate button and clear deal desk prep on every new analysis
+  const simBtn = document.getElementById('simulateBtn');
+  if (simBtn) simBtn.style.display = 'none';
   const prep = document.getElementById('dealDeskPrep');
   if (prep) prep.classList.remove('visible');
 
@@ -105,27 +126,33 @@ function showResults() {
   if (analysisResults) analysisResults.style.display = '';
   if (rightEmpty) rightEmpty.style.display = 'none';
   if (rightResults) rightResults.style.display = '';
+
+  // Show simulate button only after successful analysis
+  const simBtn = document.getElementById('simulateBtn');
+  if (simBtn) simBtn.style.display = '';
 }
 
-function showError(message) {
+function showAnalysisError(message) {
   hideLoading();
   const emptyAnalysis = document.getElementById('emptyAnalysis');
-  if (emptyAnalysis) {
-    emptyAnalysis.style.display = 'flex';
-    const title = emptyAnalysis.querySelector('.empty-state-title');
-    const desc = emptyAnalysis.querySelector('.empty-state-desc');
-    if (title) title.textContent = 'Analysis failed';
-    if (desc) desc.textContent = message || 'Please try again.';
-  }
+  if (!emptyAnalysis) return;
+  emptyAnalysis.style.display = 'flex';
+  emptyAnalysis.innerHTML = `
+    <p style="font-size:14px;font-weight:300;color:var(--red);max-width:200px;text-align:center;line-height:1.6;">
+      ${esc(message)}
+    </p>`;
 }
 
 /* ── Main Analyze Function ──────────────────────────────────────────────── */
 async function analyzeConversation() {
   const conversation = document.getElementById('conversationInput')?.value?.trim();
-  if (!conversation) {
-    alert('Please enter a conversation to analyze.');
+
+  // Short conversation guard
+  if (!conversation || conversation.length < 50) {
+    showInlineValidation('Please paste a fuller conversation — at least a few sentences work best.');
     return;
   }
+  clearInlineValidation();
 
   const btn = document.getElementById('analyzeBtn');
   if (btn) {
@@ -169,7 +196,11 @@ async function analyzeConversation() {
 
   } catch (err) {
     clearStepTimers();
-    showError(err.message);
+    showAnalysisError(
+      err.message?.includes('JSON') || err.message?.includes('parse')
+        ? 'Something went wrong analyzing this conversation. Try again or use a different example.'
+        : (err.message || 'Something went wrong analyzing this conversation. Try again or use a different example.')
+    );
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -234,6 +265,13 @@ function renderSignals(signals) {
     .join('');
 }
 
+/* ── Consumption unit label ─────────────────────────────────────────────── */
+const CONSUMPTION_UNITS = {
+  WorkflowCore:  '/workflow-run',
+  AnalyticsPlus: '/report',
+  AIAgentSuite:  '/agent-action',
+};
+
 /* ── Quote Table ─────────────────────────────────────────────────────────── */
 function renderQuote(products, pricingModelFlag) {
   const flagEl = document.getElementById('pricingFlag');
@@ -258,6 +296,7 @@ function renderQuote(products, pricingModelFlag) {
     return;
   }
 
+  const isConsumption = pricingModel === 'consumption';
   let totalMRR = 0;
 
   tbody.innerHTML = products
@@ -268,6 +307,14 @@ function renderQuote(products, pricingModelFlag) {
       const mrr = qty * unit * (1 - disc / 100);
       totalMRR += mrr;
       const model = p.pricingModel || 'seat';
+      const isUsage = model === 'consumption' || isConsumption;
+
+      // Unit price display: consumption shows per-unit cost with label
+      const unitSuffix = isUsage ? (CONSUMPTION_UNITS[p.name] || '/unit') : '/seat';
+      const unitDisplay = `$${fmtUnit(unit)}${unitSuffix}`;
+
+      // Qty label: consumption shows estimated units, seat shows seats
+      const qtyDisplay = isUsage ? qty.toLocaleString() : qty.toLocaleString();
 
       return `
         <tr>
@@ -275,16 +322,16 @@ function renderQuote(products, pricingModelFlag) {
             <div class="product-name-cell">${esc(p.name || '')}</div>
             <div class="product-reasoning-cell">${esc(p.reasoning || '')}</div>
           </td>
-          <td><span class="tag">${model === 'consumption' ? 'Usage' : 'Seat'}</span></td>
-          <td style="text-align:right;">${qty.toLocaleString()}</td>
-          <td style="text-align:right;">$${fmt(unit)}</td>
+          <td><span class="tag">${isUsage ? 'Usage' : 'Seat'}</span></td>
+          <td style="text-align:right;">${qtyDisplay}</td>
+          <td style="text-align:right;font-size:11px;">${esc(unitDisplay)}</td>
           <td style="text-align:right;">${disc > 0 ? `<span style="color:var(--green);font-weight:500;">${disc}%</span>` : '—'}</td>
           <td style="text-align:right;font-weight:500;">$${fmt(mrr)}</td>
         </tr>`;
     })
     .join('');
 
-  const totalLabel = pricingModel === 'consumption' ? 'Est. Monthly Cost' : 'Total MRR';
+  const totalLabel = isConsumption ? 'Est. monthly cost' : 'Total MRR';
   tfoot.innerHTML = `
     <tr class="total-row">
       <td colspan="5" style="text-align:right;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-light);">
@@ -339,10 +386,8 @@ function renderJustification(text) {
   const el = document.getElementById('justificationText');
   if (el) el.textContent = text || '';
 
-  const simBtn = document.getElementById('simulateBtn');
   const simText = document.getElementById('simulateBtnText');
   const prep = document.getElementById('dealDeskPrep');
-  if (simBtn) simBtn.disabled = false;
   if (simText) simText.textContent = 'Simulate Deal Desk Review';
   if (prep) prep.classList.remove('visible');
 
@@ -457,6 +502,16 @@ function fmt(n) {
     ? n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     : n.toFixed(2).replace(/\.00$/, '');
 }
+
+// For small per-unit prices (e.g. $0.08) — always show enough decimal places
+function fmtUnit(n) {
+  if (typeof n !== 'number' || isNaN(n)) return '0';
+  if (n < 1) return n.toFixed(2);
+  return fmt(n);
+}
+
+/* ── Simulate button: hidden until first successful analysis ───────────── */
+document.getElementById('simulateBtn').style.display = 'none';
 
 /* ── Spinner keyframe (injected) ────────────────────────────────────────── */
 const s = document.createElement('style');

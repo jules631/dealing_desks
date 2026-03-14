@@ -113,13 +113,14 @@ app.post('/api/analyze', async (req, res) => {
     });
 
     const rawText = response.content.find((b) => b.type === 'text')?.text ?? '';
+    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     let data;
     try {
-      data = JSON.parse(rawText);
+      data = JSON.parse(cleaned);
     } catch {
       // Try to extract JSON from response if there's any wrapping text
-      const match = rawText.match(/\{[\s\S]*\}/);
+      const match = cleaned.match(/\{[\s\S]*\}/);
       if (match) {
         data = JSON.parse(match[0]);
       } else {
@@ -160,12 +161,13 @@ app.post('/api/simulate-review', async (req, res) => {
     });
 
     const rawText = response.content.find((b) => b.type === 'text')?.text ?? '';
+    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     let questions;
     try {
-      questions = JSON.parse(rawText);
+      questions = JSON.parse(cleaned);
     } catch {
-      const match = rawText.match(/\[[\s\S]*\]/);
+      const match = cleaned.match(/\[[\s\S]*\]/);
       if (match) {
         questions = JSON.parse(match[0]);
       } else {
