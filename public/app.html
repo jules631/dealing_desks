@@ -148,11 +148,8 @@
 
   <!-- ── Right Column: Risk + Justification ─────────────────────────────── -->
   <div class="app-col" data-col="right">
-    <div class="app-col-header app-col-header--verdict">
-      <div class="col-header-stack">
-        <span class="app-col-eyebrow">03 — Risk &amp; Justification</span>
-        <div id="verdictLine" style="display:none;"></div>
-      </div>
+    <div class="app-col-header">
+      <span class="app-col-title">Risk &amp; Justification</span>
     </div>
 
     <!-- Empty -->
@@ -164,7 +161,9 @@
     <!-- Results -->
     <div id="rightResults" class="app-col-body" style="display:none;">
 
-      <p class="col-section-label">Discount Risk</p>
+      <div id="verdictLine" style="display:none;"></div>
+
+      <p class="col-section-label" id="riskSectionLabel">Discount Risk</p>
       <div id="riskCard"></div>
 
       <p class="col-section-label" style="margin-top:24px;">Approval Justification</p>

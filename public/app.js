@@ -259,11 +259,11 @@ function renderSignals(signals) {
       const tagClass = confidence === 'Explicit' ? 'tag-green' : 'tag-amber';
       return `
         <div class="signal-item">
-          <div class="signal-meta">
-            <div class="signal-type-label">${esc(sig.type || '')}</div>
-            <span class="tag ${tagClass}" style="font-size:10px;">${confidence}</span>
+          <div class="signal-type-label">${esc(sig.type || '')}</div>
+          <div class="signal-row">
+            <span class="tag ${tagClass}" style="font-size:10px;flex-shrink:0;">${confidence}</span>
+            <div class="signal-content-text">${esc(sig.content || '')}</div>
           </div>
-          <div class="signal-content-text">${esc(sig.content || '')}</div>
         </div>`;
     })
     .join('');

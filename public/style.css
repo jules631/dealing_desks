@@ -917,15 +917,13 @@ a { color: inherit; text-decoration: none; }
 /* Signals */
 .signal-item {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 11px 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 0 12px;
   border-bottom: 1px solid var(--border);
 }
 
 .signal-item:first-child { border-top: 1px solid var(--border); }
-
-.signal-meta { flex-shrink: 0; width: 80px; }
 
 .signal-type-label {
   font-size: 10px;
@@ -933,8 +931,13 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-light);
-  margin-bottom: 5px;
   line-height: 1.2;
+}
+
+.signal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .signal-content-text {
@@ -942,7 +945,6 @@ a { color: inherit; text-decoration: none; }
   font-weight: 300;
   color: var(--ink);
   line-height: 1.55;
-  flex: 1;
 }
 
 /* Column section label */
@@ -1191,32 +1193,14 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.5;
 }
 
-/* Column 3 header: stacked eyebrow + verdict */
-.app-col-header--verdict {
-  align-items: flex-start;
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-
-.col-header-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.app-col-eyebrow {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-light);
-}
-
 .verdict-line {
   font-family: 'DM Serif Display', serif;
   font-size: 18px;
   line-height: 1.2;
   font-style: normal;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* Next steps block */
