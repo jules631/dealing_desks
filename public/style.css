@@ -1145,11 +1145,11 @@ a { color: inherit; text-decoration: none; }
 .deal-desk-prep.visible { display: block; }
 
 .prep-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-light);
+  color: var(--amber);
   padding: 10px 0 8px;
   border-bottom: 1px solid var(--border);
 }
@@ -1170,11 +1170,86 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.4;
 }
 
+.pushback-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .pushback-text {
   font-size: 13px;
   font-weight: 300;
   color: var(--ink-mid);
   line-height: 1.6;
+}
+
+.pushback-action {
+  font-size: 12px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+/* Column 3 header: stacked eyebrow + verdict */
+.app-col-header--verdict {
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.col-header-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-col-eyebrow {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.verdict-line {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  line-height: 1.2;
+  font-style: normal;
+}
+
+/* Next steps block */
+.next-steps-block {
+  margin-top: 20px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+}
+
+.next-steps-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 10px;
+}
+
+.next-steps-list {
+  list-style: decimal;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+}
+
+.next-steps-list li {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--ink-mid);
+  line-height: 1.45;
 }
 
 /* Mobile tabs */

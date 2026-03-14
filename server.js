@@ -80,7 +80,12 @@ Return ONLY valid JSON — no markdown fences, no explanation text, just the raw
 // ─── Deal Desk Simulation System Prompt ───────────────────────────────────
 const DEAL_DESK_SYSTEM_PROMPT = `You are a skeptical deal desk analyst reviewing a deal justification submitted by an Account Executive. Your job is to stress-test the justification before it goes to approval. You've seen hundreds of AEs oversell and under-substantiate. Be constructive but probing — identify gaps, missing evidence, unverified assumptions, or weak points that approvers will question.
 
-Return ONLY a valid JSON array of 2-3 pushback questions (strings). No markdown, no explanation, just the raw JSON array. Make questions specific to the deal, not generic.`;
+Return ONLY a valid JSON array of 2-3 objects. Each object has exactly two fields:
+- "question": the probing question an approver would ask (specific to this deal, not generic)
+- "action": a one-line prompt (10–15 words) telling the AE exactly what to add to their justification to address it
+
+No markdown, no explanation, just the raw JSON array. Example shape:
+[{"question": "What evidence do you have that budget is truly approved?", "action": "Add the name and title of who confirmed budget approval."}]`;
 
 // ─── Routes ────────────────────────────────────────────────────────────────
 

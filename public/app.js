@@ -105,6 +105,10 @@ function showLoading() {
   const prep = document.getElementById('dealDeskPrep');
   if (prep) prep.classList.remove('visible');
 
+  // Clear verdict line
+  const verdictLine = document.getElementById('verdictLine');
+  if (verdictLine) verdictLine.style.display = 'none';
+
   // On mobile, switch to analysis tab
   if (window.innerWidth <= 860) {
     document.querySelector('[data-tab="analysis"]')?.click();
@@ -350,6 +354,21 @@ function renderRisk(risk) {
   const labels = { green: 'Low Risk', amber: 'Moderate Risk', red: 'High Risk' };
   const label = labels[rating] || 'Unknown';
 
+  // Dynamic verdict line in column 3 header
+  const verdictLine = document.getElementById('verdictLine');
+  if (verdictLine) {
+    const verdicts = {
+      green: { text: '✓ Ready to submit',                   color: 'var(--green)' },
+      amber: { text: '⚠ Address issue before submitting',   color: 'var(--amber)' },
+      red:   { text: 'Escalate to VP before submitting',     color: 'var(--red)'   },
+    };
+    const v = verdicts[rating] || verdicts.green;
+    verdictLine.textContent = v.text;
+    verdictLine.className = 'verdict-line';
+    verdictLine.style.color = v.color;
+    verdictLine.style.display = '';
+  }
+
   const vpHtml = risk.vpApprovalRequired
     ? `<div class="vp-flag">
          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -472,13 +491,19 @@ function renderPushbackQuestions(questions) {
   if (!prep || !list) return;
 
   list.innerHTML = questions
-    .map(
-      (q, i) => `
-      <div class="pushback-item">
-        <span class="pushback-num">${i + 1}</span>
-        <span class="pushback-text">${esc(String(q))}</span>
-      </div>`
-    )
+    .map((q, i) => {
+      // Handle both legacy string format and new {question, action} format
+      const questionText = typeof q === 'string' ? q : (q.question || '');
+      const actionText   = typeof q === 'object' && q.action ? q.action : '';
+      return `
+        <div class="pushback-item">
+          <span class="pushback-num">${i + 1}</span>
+          <div class="pushback-body">
+            <span class="pushback-text">${esc(questionText)}</span>
+            ${actionText ? `<span class="pushback-action">→ Add to justification: ${esc(actionText)}</span>` : ''}
+          </div>
+        </div>`;
+    })
     .join('');
 
   prep.classList.add('visible');

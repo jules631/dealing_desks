@@ -136,8 +136,13 @@ await runTest('simulate returns questions', async () => {
   assert(body.questions && Array.isArray(body.questions), 'body.questions must be array');
   assert(body.questions.length >= 2, `expected >= 2 questions, got ${body.questions.length}`);
   for (const q of body.questions) {
-    assert(typeof q === 'string', 'each question must be a string');
-    assert(q.length > 20, `question too short: "${q}"`);
+    // Accept both old string format and new {question, action} format
+    const questionText = typeof q === 'string' ? q : q.question;
+    assert(typeof questionText === 'string', 'each question.question must be a string');
+    assert(questionText.length > 20, `question too short: "${questionText}"`);
+    if (typeof q === 'object') {
+      assert(typeof q.action === 'string', 'question.action must be a string');
+    }
   }
 });
 
