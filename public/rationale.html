@@ -3,254 +3,231 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Rationale — Deal Desk AI</title>
+  <title>PM Rationale — Deal Desk AI</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="rat-body">
 
 <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
-<nav class="site-nav">
+<nav class="nav">
   <a href="/" class="nav-logo">Deal Desk <em>AI</em></a>
-  <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/rationale.html" class="active">Rationale</a></li>
-    <li><a href="/app.html">App</a></li>
-  </ul>
-  <div class="nav-cta">
-    <a href="/app.html" class="btn btn-primary btn-sm">Open App →</a>
+  <div class="nav-right">
+    <a href="/" class="nav-link">← Back to overview</a>
+    <a href="/app.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Open App →</a>
   </div>
 </nav>
 
-<!-- ── Rationale Document ────────────────────────────────────────────────── -->
-<article class="rationale-layout">
+<!-- ── Rationale Layout ──────────────────────────────────────────────────── -->
+<article class="rat-layout">
 
-  <p class="rationale-eyebrow">Product Rationale</p>
+  <p class="rat-eyebrow">PM Rationale</p>
+  <h1 class="rat-h1">Why this product exists, and what building it taught me.</h1>
+  <p class="rat-intro">Deal Desk AI started as a conviction: that the conversation is the source of truth for any enterprise deal, and that making AEs re-encode that conversation into forms is the root cause of quote errors, weak justifications, and approval delays. This is the product rationale, design decisions, and honest post-build notes.</p>
 
-  <h1 class="rationale-title">Why Deal Desk AI exists</h1>
+  <!-- TOC -->
+  <nav class="rat-toc">
+    <p class="rat-toc-label">Contents</p>
+    <ul class="rat-toc-list">
+      <li class="rat-toc-item">
+        <span class="rat-toc-num">01</span>
+        <a href="#problem" class="rat-toc-link">The problem with how deals get priced today</a>
+      </li>
+      <li class="rat-toc-item">
+        <span class="rat-toc-num">02</span>
+        <a href="#opportunity" class="rat-toc-link">Why the translation layer is now solvable</a>
+      </li>
+      <li class="rat-toc-item">
+        <span class="rat-toc-num">03</span>
+        <a href="#decisions" class="rat-toc-link">Key design decisions and the reasoning behind them</a>
+      </li>
+      <li class="rat-toc-item">
+        <span class="rat-toc-num">04</span>
+        <a href="#learned" class="rat-toc-link">What building the prototype taught me</a>
+      </li>
+      <li class="rat-toc-item">
+        <span class="rat-toc-num">05</span>
+        <a href="#next" class="rat-toc-link">What comes next if this becomes a real product</a>
+      </li>
+    </ul>
+  </nav>
 
-  <div class="rationale-meta">
-    <span>Author: Product Team</span>
-    <span>Status: Working prototype</span>
-    <span>Last updated: Q2 2025</span>
-  </div>
+  <!-- ── Section 01: Problem ──────────────────────────────────────────── -->
+  <section class="rat-section" id="problem">
+    <h2 class="rat-h2">01 — The problem with how deals get priced today</h2>
 
-  <!-- ── Problem ──────────────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">The problem we're solving</h2>
+    <div class="rat-metrics">
+      <div class="rat-metric-cell">
+        <div class="rat-metric-value">45–90</div>
+        <div class="rat-metric-label">minutes an AE spends translating one call into a CPQ quote</div>
+      </div>
+      <div class="rat-metric-cell">
+        <div class="rat-metric-value">~40%</div>
+        <div class="rat-metric-label">of submitted quotes require at least one revision before approval</div>
+      </div>
+      <div class="rat-metric-cell">
+        <div class="rat-metric-value">7–12</div>
+        <div class="rat-metric-label">days the average enterprise deal loses to slow approval cycles</div>
+      </div>
+    </div>
 
-  <p class="rationale-p">
-    Enterprise software sales runs on conversations. An AE has a call, a Slack thread, a few emails. Inside those conversations is everything you need to price and justify a deal: company size, budget signals, timeline pressure, competitive context, who has authority. All of it is there. Almost none of it makes it into the CPQ.
-  </p>
+    <p class="rat-body-text">Every enterprise software deal runs on conversations. A call, a Slack thread, a few emails. Inside those conversations is everything you need to price and justify a deal: company size, budget signals, timeline pressure, competitive context, who has authority. All of it is there. Almost none of it makes it into the CPQ.</p>
 
-  <p class="rationale-p">
-    Current CPQ tools — Salesforce CPQ, DealHub, Logik.ai — are <strong>form-first</strong>. They start with fields. The AE has to translate the conversation into those fields manually, usually after the fact, usually in a hurry. The translation is lossy by design.
-  </p>
+    <p class="rat-body-text">Current CPQ tools are <strong>form-first</strong>. They start with fields. The AE has to translate the conversation into those fields manually, usually after the fact, usually in a hurry. The translation is lossy by design. The quote emerges misconfigured. The justification is boilerplate that doesn't reflect the specific deal signals that make the discount defensible.</p>
 
-  <div class="rationale-callout">
-    <p>"AEs lose hours translating conversation context into CPQ configuration, and still submit quotes that get rejected because the approval justification doesn't reflect the actual deal conversation."</p>
-  </div>
+    <div class="rat-callout">
+      <p class="rat-callout-text">"The problem isn't that AEs don't know the deal. It's that the tools make them re-encode what they know into a format that destroys the context."</p>
+    </div>
 
-  <p class="rationale-p">
-    Two problems compound each other: the quote is often misconfigured (wrong product tier, wrong pricing model, wrong volume band), and the justification submitted to deal desk is generic boilerplate that doesn't reflect the specific conversation signals that make the discount defensible. The result: revision cycles, rejected approvals, and deals that slip because the internal process took longer than the prospect's decision window.
-  </p>
+    <p class="rat-body-text">The result is a cascade: revision cycles, rejected approvals, and deals that slip because the internal approval process took longer than the prospect's decision window. The cost isn't just the time — it's the deals that close at a lower price because the AE couldn't substantiate the ask, or don't close at all.</p>
+  </section>
 
-  <hr class="rationale-divider" />
+  <!-- ── Section 02: Opportunity ──────────────────────────────────────── -->
+  <section class="rat-section" id="opportunity">
+    <h2 class="rat-h2">02 — Why the translation layer is now solvable</h2>
 
-  <!-- ── Why Now ───────────────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">Why this is solvable now</h2>
+    <p class="rat-body-text">The gap has always been the translation layer — turning unstructured conversation into structured deal configuration. What's changed is that language models can now do this translation with genuine understanding, not key-phrase matching.</p>
 
-  <p class="rationale-p">
-    The core capability that makes this tractable is a language model that can read a raw, unstructured conversation and extract structured deal intelligence — not just key-phrase matching, but genuine understanding of what's explicit versus implied, what constitutes a budget signal versus a preference, and what level of confidence to assign each extraction.
-  </p>
+    <table class="rat-compare-table">
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th>What it misses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Salesforce CPQ</td>
+          <td>Starts with fields. No conversation layer. Justification is AE-authored from scratch with no grounding in the actual call.</td>
+        </tr>
+        <tr>
+          <td>DealHub</td>
+          <td>Guided selling by rules, not conversation. Outputs are templated — not grounded in the specific deal signals that make the discount defensible.</td>
+        </tr>
+        <tr>
+          <td>Logik.ai</td>
+          <td>Solves configuration complexity, not the translation from conversation to configuration. Still requires an AE who has already encoded the deal.</td>
+        </tr>
+        <tr>
+          <td>Gong / Chorus</td>
+          <td>Surfaces conversation intelligence retrospectively for coaching. Does not produce a quote or a justification. Different job to be done.</td>
+        </tr>
+        <tr>
+          <td>Deal Desk AI</td>
+          <td>Conversation → structured intelligence → configured quote → grounded justification. The translation layer, finally automated.</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <p class="rationale-p">
-    Claude, in particular, has two properties that make it the right model for this use case:
-  </p>
+    <p class="rat-body-text">Claude, specifically, has two properties that make it right for this use case. First, it distinguishes between what the prospect said directly and what can be inferred — which maps naturally to the Explicit/Implied signal taxonomy this tool surfaces. Second, the approval justifications it drafts sound like an experienced AE wrote them. Specific, confident, grounded in the actual conversation — not summarization boilerplate.</p>
 
-  <ul class="rationale-list">
-    <li><strong>Calibrated confidence:</strong> It distinguishes between what the prospect said directly and what can be inferred. This maps naturally to the Explicit / Implied signal taxonomy we use.</li>
-    <li><strong>Voice-aware generation:</strong> The approval justification it drafts sounds like an experienced AE wrote it — not a summarization tool. It's specific to the signals, not generic to the deal type.</li>
-  </ul>
+    <p class="rat-body-text">The white space is the translation layer. Every AE does this manually today. It's a 45-minute task that produces mediocre output and leaves value on the table — both in the quote configuration and in the justification quality.</p>
+  </section>
 
-  <hr class="rationale-divider" />
+  <!-- ── Section 03: Decisions ────────────────────────────────────────── -->
+  <section class="rat-section" id="decisions">
+    <h2 class="rat-h2">03 — Key design decisions and the reasoning behind them</h2>
 
-  <!-- ── The Gap ────────────────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">The gap existing tools leave</h2>
+    <div class="rat-decisions">
+      <div class="rat-decision-row">
+        <div class="rat-decision-q">Why a textarea, not a form?</div>
+        <div class="rat-decision-a">The AE's native artifact is the conversation — an email thread, call notes, a forwarded Slack message. Making them re-encode that into fields before we can help them defeats the purpose. We read the conversation. We produce the structure.</div>
+      </div>
+      <div class="rat-decision-row">
+        <div class="rat-decision-q">Why Explicit vs. Implied confidence?</div>
+        <div class="rat-decision-a">Not all signals are equal. "Budget is $18k/month, approved" is different from "they seem budget-constrained." The distinction matters for how much weight the justification can put on each signal. We surface this so the AE can decide how to represent the deal — we don't hide uncertainty inside confident-sounding prose.</div>
+      </div>
+      <div class="rat-decision-row">
+        <div class="rat-decision-q">Why not auto-submit the justification?</div>
+        <div class="rat-decision-a">The AE still reads, edits, and submits the justification. We draft it grounded in the actual signals; they own the final word. Deal desk analysts are experienced at spotting boilerplate — and at spotting when an AE oversold context they didn't actually have. Human in the loop is a feature.</div>
+      </div>
+      <div class="rat-decision-row">
+        <div class="rat-decision-q">Why the Simulate Deal Desk Review feature?</div>
+        <div class="rat-decision-a">The second AI pass acts as a skeptical analyst stress-testing the justification before it goes to approval. The pushback questions it returns are specific to this deal — not generic challenges. This is the difference between submitting something that holds up and submitting something that bounces back on day three of a Q-end week.</div>
+      </div>
+      <div class="rat-decision-row">
+        <div class="rat-decision-q">Why a pricing model toggle, not AI-inferred only?</div>
+        <div class="rat-decision-a">The AE sometimes has a motion in mind before the conversation analysis runs — a consumption pilot they've promised, or a seat deal the company requires for procurement compliance. Letting the AE set context before the analysis means the AI's recommendations align with the actual sales motion, not just the conversation signals.</div>
+      </div>
+    </div>
+  </section>
 
-  <table class="rationale-table">
-    <thead>
-      <tr>
-        <th>Tool</th>
-        <th>What it does</th>
-        <th>What it misses</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="td-label">Salesforce CPQ</td>
-        <td>Product catalog + pricing rules + approval workflows</td>
-        <td>Starts with fields. No conversation layer. Justification is AE-authored from scratch.</td>
-      </tr>
-      <tr>
-        <td class="td-label">DealHub</td>
-        <td>Guided selling + document generation</td>
-        <td>Guided by rules, not conversation. Outputs are templated, not grounded in the specific deal.</td>
-      </tr>
-      <tr>
-        <td class="td-label">Logik.ai</td>
-        <td>Complex product configuration logic</td>
-        <td>Solves configuration complexity, not the translation from conversation to configuration.</td>
-      </tr>
-      <tr>
-        <td class="td-label">Gong / Chorus</td>
-        <td>Call recording + coaching insights</td>
-        <td>Surfaces conversation intelligence retrospectively. Does not produce a quote or justification.</td>
-      </tr>
-      <tr>
-        <td class="td-label"><strong>Deal Desk AI</strong></td>
-        <td>Conversation → structured quote → approval justification</td>
-        <td>—</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- ── Section 04: Learned ──────────────────────────────────────────── -->
+  <section class="rat-section" id="learned">
+    <h2 class="rat-h2">04 — What building the prototype taught me</h2>
 
-  <p class="rationale-p">
-    The white space is the translation layer. Every AE does this manually today. It's a 45-minute task that produces mediocre output and leaves value — both in the quote configuration and in the justification quality — on the table.
-  </p>
+    <div class="rat-numbered">
+      <div class="rat-numbered-item">
+        <span class="rat-numbered-num">01</span>
+        <div class="rat-numbered-content">
+          <div class="rat-numbered-title">Structured output is both the product and the hardest engineering challenge.</div>
+          <p class="rat-numbered-body">The AI has to return a JSON object with a specific schema — signals with confidence labels, products with pricing calculations, a risk rating grounded in policy. Getting the model to be consistently precise, especially on discount math and volume tier logic, required a very specific system prompt. The instruction to "never invent signals" and to "ground every justification claim in a specific quote from the conversation" was the most important prompt engineering decision in the whole project.</p>
+        </div>
+      </div>
+      <div class="rat-numbered-item">
+        <span class="rat-numbered-num">02</span>
+        <div class="rat-numbered-content">
+          <div class="rat-numbered-title">The conversation-first constraint is load-bearing, not aesthetic.</div>
+          <p class="rat-numbered-body">Early in design, I considered adding an optional form for AEs who "prefer structure." Dropping it was the right call. The moment you add form fields, you're back in CPQ-land — the AE is re-encoding the deal instead of feeding context. The textarea forces the product to earn its value by reading unstructured text. That constraint is what makes the prototype interesting.</p>
+        </div>
+      </div>
+      <div class="rat-numbered-item">
+        <span class="rat-numbered-num">03</span>
+        <div class="rat-numbered-content">
+          <div class="rat-numbered-title">Two-call architecture doubles latency but improves quality significantly.</div>
+          <p class="rat-numbered-body">The deal desk simulation is a second API call with a separate system prompt — a skeptical analyst reviewing the justification rather than an analyst generating it. Running these as a single prompt produced weaker pushback questions; the role separation matters. The added latency (roughly 4–8 seconds) is acceptable because simulation is opt-in and happens after the primary analysis, not on the critical path.</p>
+        </div>
+      </div>
+      <div class="rat-numbered-item">
+        <span class="rat-numbered-num">04</span>
+        <div class="rat-numbered-content">
+          <div class="rat-numbered-title">The approval justification is the highest-value output — and the hardest to evaluate.</div>
+          <p class="rat-numbered-body">Quote configuration is verifiable: the math either matches policy or it doesn't. Signal extraction is assessable: you can compare the signals to the conversation and check for hallucinations. The justification is harder — it has to be confident, specific, AE-voiced, and grounded without being generic. The instruction to write it "in the voice of an experienced AE — confident, specific, business-justified, not generic" produced noticeably better output than asking for a "summary."</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <hr class="rationale-divider" />
+  <!-- ── Section 05: Next ─────────────────────────────────────────────── -->
+  <section class="rat-section" id="next">
+    <h2 class="rat-h2">05 — What comes next if this becomes a real product</h2>
 
-  <!-- ── Design decisions ──────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">Key design decisions</h2>
+    <div class="rat-next-grid">
+      <div class="rat-next-card">
+        <div class="rat-next-card-label">Validation</div>
+        <div class="rat-next-card-title">Run a structured pilot with 10–15 AEs</div>
+        <p class="rat-next-card-body">Baseline the current time-from-call-to-quote-submission and first-pass approval rate. Measure against those metrics — not just sentiment. High reuse of the AI justification draft with minimal editing is the leading indicator that the output is genuinely useful.</p>
+      </div>
+      <div class="rat-next-card">
+        <div class="rat-next-card-label">Integration</div>
+        <div class="rat-next-card-title">Gong transcript ingestion</div>
+        <p class="rat-next-card-body">The current input is a manual paste. The natural next step is reading Gong/Chorus transcripts directly, eliminating the copy-paste step and giving the AI richer signal from the full call rather than whatever the AE remembered to put in their notes.</p>
+      </div>
+      <div class="rat-next-card">
+        <div class="rat-next-card-label">Catalog</div>
+        <div class="rat-next-card-title">Live product catalog via CRM sync</div>
+        <p class="rat-next-card-body">The current catalog is hardcoded. A real version would pull pricing, discount policy, and approval thresholds from the CRM or product catalog API. The discount risk logic and VP approval flags should reflect current policy, not a snapshot baked into the system prompt.</p>
+      </div>
+      <div class="rat-next-card">
+        <div class="rat-next-card-label">Workflow</div>
+        <div class="rat-next-card-title">One-click CPQ prefill</div>
+        <p class="rat-next-card-body">The current output is a copyable justification. The high-value completion is writing the CPQ fields directly — product, quantity, pricing model, discount — via Salesforce CPQ or DealHub API. The AE reviews, edits if needed, and submits. The translation step disappears entirely.</p>
+      </div>
+    </div>
 
-  <h3 class="rationale-h3">1. Conversation-first, not field-first</h3>
-  <p class="rationale-p">
-    The input is a textarea, not a form. This is deliberate. The AE's native artifact is the conversation — an email thread, call notes, a forwarded Slack message. Making them re-encode that into fields before we can help them defeats the purpose. We read the conversation. We produce the structure.
-  </p>
-
-  <h3 class="rationale-h3">2. Explicit vs. Implied confidence taxonomy</h3>
-  <p class="rationale-p">
-    Not all signals are equal. "Budget is $18k/month, approved" is different from "they seem budget-constrained." The distinction matters for how much weight the justification can put on each signal. We surface this explicitly so the AE can decide how to represent the deal — we don't hide uncertainty inside confident-sounding prose.
-  </p>
-
-  <h3 class="rationale-h3">3. Grounded justifications, not generated ones</h3>
-  <p class="rationale-p">
-    The approval justification must be traceable to specific conversation signals. "Customer has a Q2 deadline" is only useful if the conversation actually contained a Q2 deadline. We instruct the model to never invent signals — and to write justifications that cite the source of each claim. Deal desk analysts are experienced at spotting boilerplate. We don't produce boilerplate.
-  </p>
-
-  <h3 class="rationale-h3">4. Discount risk before commitment</h3>
-  <p class="rationale-p">
-    The discount risk assessment surfaces before the AE submits. This matters because the cost of getting a VP approval flag wrong isn't just the rejected approval — it's the week of back-and-forth, the deal that cools down, the rep whose credibility takes a hit. Showing the gap between what the prospect implied and what policy allows gives the AE a decision to make, not a surprise to manage.
-  </p>
-
-  <h3 class="rationale-h3">5. Deal desk simulation as a rehearsal mechanism</h3>
-  <p class="rationale-p">
-    The "Simulate Deal Desk Review" feature runs a second AI pass acting as a skeptical analyst. The pushback questions it returns are the questions a deal desk analyst would actually ask — not generic challenges, but challenges specific to this deal's signals and justification. This is the difference between submitting something that holds up and submitting something that bounces back on day three of a Q-end week.
-  </p>
-
-  <hr class="rationale-divider" />
-
-  <!-- ── What we're not building ───────────────────────────────────────── -->
-  <h2 class="rationale-h2">What we are not building</h2>
-
-  <ul class="rationale-list">
-    <li><strong>A CPQ replacement.</strong> We generate a quote configuration recommendation. The AE still submits through whatever CPQ the org uses. We're the layer before CPQ, not a replacement for it.</li>
-    <li><strong>A call recording tool.</strong> We process text the AE provides. We don't record calls, transcribe audio, or integrate with Gong. The AE controls what context they feed us.</li>
-    <li><strong>An approval automation tool.</strong> We draft the justification. A human still submits it and a human still approves it. We're making the human's input better, not removing them from the loop.</li>
-    <li><strong>A CRM data sync.</strong> No Salesforce integration in v1. The AE copies the justification to their clipboard and pastes it where it needs to go. This is a feature, not a limitation — it keeps the tool lightweight and the AE in control.</li>
-  </ul>
-
-  <hr class="rationale-divider" />
-
-  <!-- ── Product catalog logic ─────────────────────────────────────────── -->
-  <h2 class="rationale-h2">The product catalog model</h2>
-
-  <p class="rationale-p">
-    The current catalog contains three products. Each has seat-based and consumption-based pricing options. The AI recommends a pricing model based on signals from the conversation:
-  </p>
-
-  <table class="rationale-table">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Seat Price</th>
-        <th>Consumption Price</th>
-        <th>Max Discount</th>
-        <th>Best fit</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="td-label">WorkflowCore</td>
-        <td>$45 / seat / mo</td>
-        <td>$0.08 / workflow-run</td>
-        <td>25%</td>
-        <td>Process automation pain</td>
-      </tr>
-      <tr>
-        <td class="td-label">AnalyticsPlus</td>
-        <td>$30 / seat / mo</td>
-        <td>$0.12 / report-generated</td>
-        <td>20%</td>
-        <td>Reporting / data visibility pain</td>
-      </tr>
-      <tr>
-        <td class="td-label">AIAgentSuite</td>
-        <td>$120 / seat / mo</td>
-        <td>$0.45 / agent-action</td>
-        <td>15% (VP flag above 10%)</td>
-        <td>AI automation / headcount reduction goals</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p class="rationale-p">
-    The consumption vs. seat recommendation follows a simple rule: if the prospect expresses uncertainty about headcount, mentions variable usage, or describes seasonal spikes, consumption is recommended. If headcount is stable and budget is predictable, seat-based wins. A "mixed transition deal" flag is raised if the prospect is moving from seat to consumption — this requires revenue ops review.
-  </p>
-
-  <hr class="rationale-divider" />
-
-  <!-- ── Success metrics ───────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">How we'd measure success</h2>
-
-  <ul class="rationale-list">
-    <li><strong>Time from call to quote submission.</strong> Baseline is approximately 45–90 minutes. Target is under 10 minutes for the extraction and configuration pass.</li>
-    <li><strong>First-pass approval rate.</strong> Quotes that are approved without a revision request. We'd measure this against a control group using the standard workflow.</li>
-    <li><strong>Justification reuse rate.</strong> The percentage of submitted justifications where the AE used the AI draft with minimal editing. High reuse means the output is actually useful; low reuse means we're generating a starting point, not a finished artifact.</li>
-    <li><strong>Deal velocity.</strong> Time from quote submission to closed-won. Hypothesis: faster, better-justified quotes close faster because they don't stall in approval.</li>
-  </ul>
-
-  <hr class="rationale-divider" />
-
-  <!-- ── Closing ────────────────────────────────────────────────────────── -->
-  <h2 class="rationale-h2">The bet we're making</h2>
-
-  <p class="rationale-p">
-    The bet is that <strong>the conversation is the source of truth for the deal</strong>, and that extracting structure from it — rather than asking the AE to encode structure into forms — produces better outcomes: more accurate quotes, more defensible justifications, fewer revision cycles, faster closes.
-  </p>
-
-  <p class="rationale-p">
-    CPQ tools have solved the configuration problem. They haven't solved the translation problem. That's the gap Deal Desk AI is built to close.
-  </p>
-
-  <div class="rationale-callout">
-    <p>The product is conversation-first by conviction, not by convenience. Every design decision flows from that single constraint.</p>
-  </div>
-
-  <div style="margin-top:48px;display:flex;gap:12px;flex-wrap:wrap;">
-    <a href="/app.html" class="btn btn-primary">Try the App →</a>
-    <a href="/" class="btn">Back to Home</a>
-  </div>
+    <div class="rat-callout">
+      <p class="rat-callout-text">The bet is that the conversation is the source of truth for the deal, and that extracting structure from it — rather than asking the AE to encode structure into forms — produces better outcomes: more accurate quotes, more defensible justifications, fewer revision cycles, faster closes.</p>
+    </div>
+  </section>
 
 </article>
 
 <!-- ── Footer ────────────────────────────────────────────────────────────── -->
-<footer class="hp-footer" style="border-top:1px solid var(--border);">
-  <span class="hp-footer-logo">Deal Desk <em style="font-style:italic;font-family:'DM Serif Display',serif;">AI</em></span>
-  <ul class="hp-footer-links">
-    <li><a href="/app.html">App</a></li>
-    <li><a href="/rationale.html">Rationale</a></li>
-  </ul>
-  <span class="hp-footer-copy">Built with Claude</span>
+<footer class="rat-footer">
+  <span class="rat-footer-left">Deal Desk <em style="font-style:italic;font-family:'DM Serif Display',serif;">AI</em> — Working prototype, Q2 2025</span>
+  <div style="display:flex;gap:20px;align-items:center;">
+    <a href="/app.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Try the App →</a>
+    <a href="/" class="btn" style="padding:8px 16px;font-size:13px;">Back to overview</a>
+  </div>
 </footer>
 
 </body>

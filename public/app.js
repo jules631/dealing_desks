@@ -10,6 +10,15 @@ const EXAMPLES = {
 /* ── State ─────────────────────────────────────────────────────────────── */
 let currentResult = null;
 let stepTimers = [];
+let pricingModel = 'seat';
+
+/* ── Pricing Model Toggle ───────────────────────────────────────────────── */
+function setPricingModel(model) {
+  pricingModel = model;
+  document.querySelectorAll('.pricing-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('onclick') === `setPricingModel('${model}')`);
+  });
+}
 
 /* ── Mobile Tab Navigation ─────────────────────────────────────────────── */
 document.querySelectorAll('.app-tab-btn').forEach((btn) => {
@@ -135,7 +144,7 @@ async function analyzeConversation() {
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation }),
+      body: JSON.stringify({ conversation, pricingModel }),
     });
 
     const data = await response.json();
@@ -150,10 +159,8 @@ async function analyzeConversation() {
 
     // Update nav company display
     if (data.company?.name && data.company.name !== 'Unknown') {
-      const display = document.getElementById('navCompanyDisplay');
       const name = document.getElementById('navCompanyName');
-      if (display) display.style.display = '';
-      if (name) name.textContent = data.company.name;
+      if (name) { name.textContent = data.company.name; name.style.display = ''; }
     }
 
     // On mobile, mark analysis status
@@ -268,7 +275,7 @@ function renderQuote(products, pricingModelFlag) {
             <div class="product-name-cell">${esc(p.name || '')}</div>
             <div class="product-reasoning-cell">${esc(p.reasoning || '')}</div>
           </td>
-          <td><span class="tag">${esc(model)}</span></td>
+          <td><span class="tag">${model === 'consumption' ? 'Usage' : 'Seat'}</span></td>
           <td style="text-align:right;">${qty.toLocaleString()}</td>
           <td style="text-align:right;">$${fmt(unit)}</td>
           <td style="text-align:right;">${disc > 0 ? `<span style="color:var(--green);font-weight:500;">${disc}%</span>` : '—'}</td>
@@ -277,10 +284,11 @@ function renderQuote(products, pricingModelFlag) {
     })
     .join('');
 
+  const totalLabel = pricingModel === 'consumption' ? 'Est. Monthly Cost' : 'Total MRR';
   tfoot.innerHTML = `
     <tr class="total-row">
       <td colspan="5" style="text-align:right;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-light);">
-        Est. Monthly Recurring Revenue
+        ${totalLabel}
       </td>
       <td style="text-align:right;font-family:'DM Serif Display',serif;font-size:18px;">$${fmt(totalMRR)}</td>
     </tr>`;

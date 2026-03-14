@@ -6,18 +6,14 @@
   <title>Deal Desk AI — App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="app-body">
 
 <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
-<nav class="site-nav">
+<nav class="nav">
   <a href="/" class="nav-logo">Deal Desk <em>AI</em></a>
-  <ul class="nav-links">
-    <li><a href="/">Home</a></li>
-    <li><a href="/rationale.html">Rationale</a></li>
-    <li><a href="/app.html" class="active">App</a></li>
-  </ul>
-  <div class="nav-cta" id="navCompanyDisplay" style="display:none;">
-    <span class="label" id="navCompanyName" style="font-size:12px;"></span>
+  <div class="nav-right">
+    <a href="/" class="nav-link">← Back to overview</a>
+    <span class="nav-link" id="navCompanyName" style="display:none;"></span>
   </div>
 </nav>
 
@@ -39,6 +35,15 @@
       <span class="app-col-title">Conversation</span>
     </div>
     <div class="app-col-body">
+
+      <!-- Pricing model toggle -->
+      <div class="pricing-toggle">
+        <span style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-light);">Pricing model</span>
+        <div class="pricing-toggle-btns">
+          <button class="pricing-btn active" onclick="setPricingModel('seat')">Seat-based</button>
+          <button class="pricing-btn" onclick="setPricingModel('consumption')">Consumption</button>
+        </div>
+      </div>
 
       <textarea
         id="conversationInput"
@@ -150,7 +155,7 @@
     <!-- Empty -->
     <div class="empty-state" id="rightEmpty">
       <div class="empty-state-title">Awaiting analysis</div>
-      <div class="empty-state-desc">Discount risk and approval draft will appear after analysis runs.</div>
+      <div class="empty-state-desc">Risk assessment and approval justification will appear here after analysis runs.</div>
     </div>
 
     <!-- Results -->

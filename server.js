@@ -84,11 +84,20 @@ Return ONLY a valid JSON array of 2-3 pushback questions (strings). No markdown,
 
 // ─── Routes ────────────────────────────────────────────────────────────────
 
+// Clean URL for the app page
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'app.html'));
+});
+
 app.post('/api/analyze', async (req, res) => {
-  const { conversation } = req.body;
+  const { conversation, pricingModel = 'seat' } = req.body;
   if (!conversation || !conversation.trim()) {
     return res.status(400).json({ error: 'Conversation text is required.' });
   }
+
+  const pricingNote = pricingModel === 'consumption'
+    ? 'The AE has pre-selected consumption-based pricing for this deal. Prioritize consumption model recommendations and use consumption unit prices in your output.'
+    : 'The AE has pre-selected seat-based pricing for this deal. Prioritize seat-based model recommendations and use seat unit prices in your output.';
 
   try {
     const response = await client.messages.create({
@@ -98,7 +107,7 @@ app.post('/api/analyze', async (req, res) => {
       messages: [
         {
           role: 'user',
-          content: `Analyze this sales conversation and extract deal intelligence:\n\n---\n${conversation}\n---`,
+          content: `Analyze this sales conversation and extract deal intelligence:\n\n---\n${conversation}\n---\n\nPRICING CONTEXT: ${pricingNote}`,
         },
       ],
     });
