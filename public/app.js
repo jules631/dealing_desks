@@ -9,56 +9,48 @@ const EXAMPLES = {
 
 /* ── State ─────────────────────────────────────────────────────────────── */
 let currentResult = null;
-let analysisAborted = false;
+let stepTimers = [];
 
-/* ── Mobile Tabs ───────────────────────────────────────────────────────── */
-document.querySelectorAll('.tab-btn').forEach((btn) => {
+/* ── Mobile Tab Navigation ─────────────────────────────────────────────── */
+document.querySelectorAll('.app-tab-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     const tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.app-tab-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
-    document.querySelectorAll('.col-input, .col-analysis, .col-right').forEach((col) => {
-      col.classList.remove('tab-active');
-    });
-    const map = { input: '.col-input', analysis: '.col-analysis', right: '.col-right' };
-    document.querySelector(map[tab])?.classList.add('tab-active');
+    document.querySelectorAll('.app-col').forEach((col) => col.classList.remove('tab-visible'));
+    const map = { input: '[data-col="input"]', analysis: '[data-col="analysis"]', right: '[data-col="right"]' };
+    document.querySelector(map[tab])?.classList.add('tab-visible');
   });
 });
 
 /* ── Load Example ──────────────────────────────────────────────────────── */
 function loadExample(n) {
-  const textarea = document.getElementById('conversationInput');
-  textarea.value = EXAMPLES[n];
-  textarea.focus();
+  const ta = document.getElementById('conversationInput');
+  ta.value = EXAMPLES[n];
+  ta.focus();
 }
 
-/* ── Loading Step Animator ─────────────────────────────────────────────── */
-let stepTimers = [];
-
+/* ── Loading Steps ─────────────────────────────────────────────────────── */
 function startLoadingSteps() {
   ['step1', 'step2', 'step3'].forEach((id) => {
     const el = document.getElementById(id);
-    el.classList.remove('active', 'done');
+    if (el) el.classList.remove('active', 'done');
   });
 
-  const activate = (id, delay) =>
-    setTimeout(() => {
-      document.getElementById(id)?.classList.add('active');
-    }, delay);
-
+  const activate = (id, delay) => setTimeout(() => document.getElementById(id)?.classList.add('active'), delay);
   const done = (id, delay) =>
     setTimeout(() => {
       const el = document.getElementById(id);
-      el?.classList.remove('active');
-      el?.classList.add('done');
-      el.querySelector('.step-icon').textContent = '✓';
+      if (!el) return;
+      el.classList.remove('active');
+      el.classList.add('done');
     }, delay);
 
   stepTimers.push(activate('step1', 0));
-  stepTimers.push(done('step1', 1200));
-  stepTimers.push(activate('step2', 1200));
-  stepTimers.push(done('step2', 2400));
-  stepTimers.push(activate('step3', 2400));
+  stepTimers.push(done('step1', 1100));
+  stepTimers.push(activate('step2', 1100));
+  stepTimers.push(done('step2', 2300));
+  stepTimers.push(activate('step3', 2300));
 }
 
 function clearStepTimers() {
@@ -66,55 +58,78 @@ function clearStepTimers() {
   stepTimers = [];
 }
 
-/* ── Show / Hide Panels ─────────────────────────────────────────────────── */
+/* ── Panel Visibility Helpers ──────────────────────────────────────────── */
 function showLoading() {
-  document.getElementById('loadingPanel').style.display = '';
-  document.getElementById('emptyAnalysis').style.display = 'none';
-  document.getElementById('signalsPanel').style.display = 'none';
-  document.getElementById('quotePanel').style.display = 'none';
-  document.getElementById('riskPanel').style.display = 'none';
-  document.getElementById('justPanel').style.display = 'none';
-  document.getElementById('rightEmpty').style.display = '';
-  document.getElementById('dealDeskPrep').classList.remove('visible');
+  const loadingPanel = document.getElementById('loadingPanel');
+  const emptyAnalysis = document.getElementById('emptyAnalysis');
+  const analysisResults = document.getElementById('analysisResults');
+  const rightEmpty = document.getElementById('rightEmpty');
+  const rightResults = document.getElementById('rightResults');
+
+  if (loadingPanel) loadingPanel.classList.add('visible');
+  if (emptyAnalysis) emptyAnalysis.style.display = 'none';
+  if (analysisResults) analysisResults.style.display = 'none';
+  if (rightEmpty) rightEmpty.style.display = 'flex';
+  if (rightResults) rightResults.style.display = 'none';
+
+  const prep = document.getElementById('dealDeskPrep');
+  if (prep) prep.classList.remove('visible');
+
+  // On mobile, switch to analysis tab
+  if (window.innerWidth <= 860) {
+    document.querySelector('[data-tab="analysis"]')?.click();
+  }
 }
 
 function hideLoading() {
-  document.getElementById('loadingPanel').style.display = 'none';
+  const loadingPanel = document.getElementById('loadingPanel');
+  if (loadingPanel) loadingPanel.classList.remove('visible');
 }
 
 function showResults() {
-  document.getElementById('emptyAnalysis').style.display = 'none';
-  document.getElementById('signalsPanel').style.display = '';
-  document.getElementById('quotePanel').style.display = '';
-  document.getElementById('riskPanel').style.display = '';
-  document.getElementById('justPanel').style.display = '';
-  document.getElementById('rightEmpty').style.display = 'none';
+  const emptyAnalysis = document.getElementById('emptyAnalysis');
+  const analysisResults = document.getElementById('analysisResults');
+  const rightEmpty = document.getElementById('rightEmpty');
+  const rightResults = document.getElementById('rightResults');
+
+  if (emptyAnalysis) emptyAnalysis.style.display = 'none';
+  if (analysisResults) analysisResults.style.display = '';
+  if (rightEmpty) rightEmpty.style.display = 'none';
+  if (rightResults) rightResults.style.display = '';
+}
+
+function showError(message) {
+  hideLoading();
+  const emptyAnalysis = document.getElementById('emptyAnalysis');
+  if (emptyAnalysis) {
+    emptyAnalysis.style.display = 'flex';
+    const title = emptyAnalysis.querySelector('.empty-state-title');
+    const desc = emptyAnalysis.querySelector('.empty-state-desc');
+    if (title) title.textContent = 'Analysis failed';
+    if (desc) desc.textContent = message || 'Please try again.';
+  }
 }
 
 /* ── Main Analyze Function ──────────────────────────────────────────────── */
 async function analyzeConversation() {
-  const conversation = document.getElementById('conversationInput').value.trim();
+  const conversation = document.getElementById('conversationInput')?.value?.trim();
   if (!conversation) {
     alert('Please enter a conversation to analyze.');
     return;
   }
 
   const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  btn.innerHTML = `
-    <svg width="16" height="16" class="spinning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-    </svg>
-    Analyzing…`;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg width="14" height="14" class="spinning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Analyzing…`;
+  }
 
   showLoading();
   startLoadingSteps();
-
-  // Switch mobile to analysis tab
-  const mobileAnalysisTab = document.querySelector('[data-tab="analysis"]');
-  if (mobileAnalysisTab && window.innerWidth <= 900) {
-    mobileAnalysisTab.click();
-  }
 
   try {
     const response = await fetch('/api/analyze', {
@@ -125,33 +140,42 @@ async function analyzeConversation() {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Analysis failed.');
-    }
+    if (!response.ok) throw new Error(data.error || 'Analysis failed.');
 
     currentResult = data;
     clearStepTimers();
     hideLoading();
     renderResults(data);
     showResults();
+
+    // Update nav company display
+    if (data.company?.name && data.company.name !== 'Unknown') {
+      const display = document.getElementById('navCompanyDisplay');
+      const name = document.getElementById('navCompanyName');
+      if (display) display.style.display = '';
+      if (name) name.textContent = data.company.name;
+    }
+
+    // On mobile, mark analysis status
+    const status = document.getElementById('analysisStatus');
+    if (status) { status.textContent = 'Complete'; status.style.display = ''; }
+
   } catch (err) {
     clearStepTimers();
-    hideLoading();
-    document.getElementById('emptyAnalysis').style.display = '';
-    document.getElementById('emptyAnalysis').querySelector('.empty-title').textContent = 'Analysis failed';
-    document.getElementById('emptyAnalysis').querySelector('.empty-desc').textContent =
-      err.message || 'Please try again.';
+    showError(err.message);
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = `
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-      </svg>
-      Analyze Conversation`;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        Analyze Conversation`;
+    }
   }
 }
 
-/* ── Render Results ─────────────────────────────────────────────────────── */
+/* ── Render All Results ─────────────────────────────────────────────────── */
 function renderResults(data) {
   renderCompany(data.company);
   renderSignals(data.signals);
@@ -160,47 +184,44 @@ function renderResults(data) {
   renderJustification(data.approvalJustification);
 }
 
-/* ── Company Bar ─────────────────────────────────────────────────────────── */
+/* ── Company Header ─────────────────────────────────────────────────────── */
 function renderCompany(company) {
-  if (!company || !company.name || company.name === 'Unknown') {
-    document.getElementById('companyBar').style.display = 'none';
+  const header = document.getElementById('companyHeader');
+  if (!company?.name || company.name === 'Unknown') {
+    if (header) header.style.display = 'none';
     return;
   }
-
-  const name = company.name;
-  const initial = name.charAt(0).toUpperCase();
-  document.getElementById('companyAvatar').textContent = initial;
-  document.getElementById('companyName').textContent = name;
-
-  const parts = [];
-  if (company.size) parts.push(company.size);
-  if (company.industry) parts.push(company.industry);
-  document.getElementById('companyMeta').textContent = parts.join(' · ') || '—';
-
-  document.getElementById('companyBar').style.display = '';
+  const initial = document.getElementById('companyInitial');
+  const name = document.getElementById('companyName');
+  const meta = document.getElementById('companyMeta');
+  if (initial) initial.textContent = company.name.charAt(0).toUpperCase();
+  if (name) name.textContent = company.name;
+  const parts = [company.size, company.industry].filter(Boolean);
+  if (meta) meta.textContent = parts.join(' · ') || '—';
+  if (header) header.style.display = '';
 }
 
-/* ── Signals ─────────────────────────────────────────────────────────────── */
+/* ── Signals ────────────────────────────────────────────────────────────── */
 function renderSignals(signals) {
   const container = document.getElementById('signalsList');
+  if (!container) return;
 
-  if (!signals || signals.length === 0) {
-    container.innerHTML = '<div style="color:var(--text-secondary);font-size:12px;">No signals extracted.</div>';
+  if (!signals?.length) {
+    container.innerHTML = '<p style="font-size:13px;font-weight:300;color:var(--ink-light);">No signals extracted.</p>';
     return;
   }
 
   container.innerHTML = signals
     .map((sig) => {
-      const badgeClass = sig.confidence === 'Explicit' ? 'explicit' : 'implied';
+      const confidence = sig.confidence === 'Explicit' ? 'Explicit' : 'Implied';
+      const tagClass = confidence === 'Explicit' ? 'tag-green' : 'tag-amber';
       return `
         <div class="signal-item">
-          <div class="signal-left">
-            <span class="confidence-badge ${badgeClass}">${escapeHtml(sig.confidence)}</span>
+          <div class="signal-meta">
+            <div class="signal-type-label">${esc(sig.type || '')}</div>
+            <span class="tag ${tagClass}" style="font-size:10px;">${confidence}</span>
           </div>
-          <div>
-            <div class="signal-type">${escapeHtml(sig.type || '')}</div>
-            <div class="signal-content">${escapeHtml(sig.content || '')}</div>
-          </div>
+          <div class="signal-content-text">${esc(sig.content || '')}</div>
         </div>`;
     })
     .join('');
@@ -208,143 +229,161 @@ function renderSignals(signals) {
 
 /* ── Quote Table ─────────────────────────────────────────────────────────── */
 function renderQuote(products, pricingModelFlag) {
-  // Pricing model flag
   const flagEl = document.getElementById('pricingFlag');
-  if (pricingModelFlag) {
-    flagEl.innerHTML = `
-      <div class="pricing-flag">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        <div><strong>Pricing Flag:</strong> ${escapeHtml(pricingModelFlag)}</div>
-      </div>`;
-  } else {
-    flagEl.innerHTML = '';
+  if (flagEl) {
+    flagEl.innerHTML = pricingModelFlag
+      ? `<div class="pricing-flag">
+           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+           </svg>
+           <span><strong>Flag:</strong> ${esc(pricingModelFlag)}</span>
+         </div>`
+      : '';
   }
 
-  if (!products || products.length === 0) {
-    document.getElementById('quoteTableBody').innerHTML =
-      '<tr><td colspan="6" style="color:var(--text-secondary);text-align:center;">No products recommended.</td></tr>';
+  const tbody = document.getElementById('quoteTableBody');
+  const tfoot = document.getElementById('quoteTfoot');
+  if (!tbody || !tfoot) return;
+
+  if (!products?.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-light);font-size:12px;padding:16px;">No products recommended.</td></tr>';
+    tfoot.innerHTML = '';
     return;
   }
 
   let totalMRR = 0;
 
-  const rows = products.map((p) => {
-    const qty = p.quantity || 0;
-    const unit = p.unitPrice || 0;
-    const volDisc = p.volumeDiscount || 0;
-    const mrr = qty * unit * (1 - volDisc / 100);
-    totalMRR += mrr;
+  tbody.innerHTML = products
+    .map((p) => {
+      const qty = p.quantity || 0;
+      const unit = p.unitPrice || 0;
+      const disc = p.volumeDiscount || 0;
+      const mrr = qty * unit * (1 - disc / 100);
+      totalMRR += mrr;
+      const model = p.pricingModel || 'seat';
 
-    const pricingLabel = p.pricingModel || 'seat';
-
-    return `
-      <tr>
-        <td>
-          <div class="product-name">${escapeHtml(p.name || '')}</div>
-          <div class="product-reasoning">${escapeHtml(p.reasoning || '')}</div>
-        </td>
-        <td><span class="pricing-badge ${pricingLabel}">${escapeHtml(pricingLabel)}</span></td>
-        <td>${qty.toLocaleString()}</td>
-        <td>$${formatNum(unit)}</td>
-        <td>${volDisc > 0 ? `<span class="discount-badge">${volDisc}%</span>` : '—'}</td>
-        <td><strong>$${formatNum(mrr)}</strong></td>
-      </tr>`;
-  });
-
-  document.getElementById('quoteTableBody').innerHTML = rows.join('');
-
-  document.getElementById('quoteTotals').innerHTML = `
-    <table>
-      <tfoot>
-        <tr class="total-row">
-          <td colspan="5" style="text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-secondary);">
-            Estimated Monthly Recurring Revenue
+      return `
+        <tr>
+          <td>
+            <div class="product-name-cell">${esc(p.name || '')}</div>
+            <div class="product-reasoning-cell">${esc(p.reasoning || '')}</div>
           </td>
-          <td style="font-size:16px;">$${formatNum(totalMRR)}/mo</td>
-        </tr>
-      </tfoot>
-    </table>`;
+          <td><span class="tag">${esc(model)}</span></td>
+          <td style="text-align:right;">${qty.toLocaleString()}</td>
+          <td style="text-align:right;">$${fmt(unit)}</td>
+          <td style="text-align:right;">${disc > 0 ? `<span style="color:var(--green);font-weight:500;">${disc}%</span>` : '—'}</td>
+          <td style="text-align:right;font-weight:500;">$${fmt(mrr)}</td>
+        </tr>`;
+    })
+    .join('');
+
+  tfoot.innerHTML = `
+    <tr class="total-row">
+      <td colspan="5" style="text-align:right;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-light);">
+        Est. Monthly Recurring Revenue
+      </td>
+      <td style="text-align:right;font-family:'DM Serif Display',serif;font-size:18px;">$${fmt(totalMRR)}</td>
+    </tr>`;
 }
 
-/* ── Risk Card ────────────────────────────────────────────────────────────── */
+/* ── Risk Card ──────────────────────────────────────────────────────────── */
 function renderRisk(risk) {
-  if (!risk) return;
+  const card = document.getElementById('riskCard');
+  if (!card || !risk) return;
 
   const rating = (risk.rating || 'green').toLowerCase();
-  const emoji = { green: '✅', amber: '⚠️', red: '🔴' }[rating] || '✅';
-  const label = { green: 'Low Risk', amber: 'Moderate Risk', red: 'High Risk' }[rating] || 'Unknown';
+  const labels = { green: 'Low Risk', amber: 'Moderate Risk', red: 'High Risk' };
+  const label = labels[rating] || 'Unknown';
 
-  const vpFlag =
-    risk.vpApprovalRequired
-      ? `<div class="vp-flag">⚡ VP Approval Required</div>`
-      : '';
+  const vpHtml = risk.vpApprovalRequired
+    ? `<div class="vp-flag">
+         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+         VP Approval Required
+       </div>`
+    : '';
 
-  document.getElementById('riskCard').innerHTML = `
+  card.innerHTML = `
     <div class="risk-card ${rating}">
       <div class="risk-header">
-        <div class="risk-icon">${emoji}</div>
         <div>
           <div class="risk-title">${label}</div>
-          <div class="risk-subtitle">Discount Risk Assessment</div>
+          <div class="risk-subtitle">Discount assessment</div>
+        </div>
+        <span class="tag ${rating === 'green' ? 'tag-green' : rating === 'amber' ? 'tag-amber' : 'tag-red'}">${rating.toUpperCase()}</span>
+      </div>
+      <div class="risk-nums">
+        <div class="risk-num-cell">
+          <div class="risk-num-label">Requested</div>
+          <div class="risk-num-value">${risk.requestedDiscount || 0}%</div>
+        </div>
+        <div class="risk-num-cell">
+          <div class="risk-num-label">Policy Max</div>
+          <div class="risk-num-value">${risk.policyMax || 0}%</div>
         </div>
       </div>
-      <div class="risk-numbers">
-        <div class="risk-number-item">
-          <div class="risk-number-label">Requested</div>
-          <div class="risk-number-value">${risk.requestedDiscount || 0}%</div>
-        </div>
-        <div class="risk-number-item">
-          <div class="risk-number-label">Policy Max</div>
-          <div class="risk-number-value">${risk.policyMax || 0}%</div>
-        </div>
-      </div>
-      <div class="risk-explanation">${escapeHtml(risk.explanation || '')}</div>
-      ${vpFlag}
+      <div class="risk-explanation">${esc(risk.explanation || '')}</div>
+      ${vpHtml}
     </div>`;
 }
 
-/* ── Justification ────────────────────────────────────────────────────────── */
+/* ── Justification ──────────────────────────────────────────────────────── */
 function renderJustification(text) {
-  document.getElementById('justificationText').textContent = text || '';
-  document.getElementById('simulateBtn').disabled = false;
-  document.getElementById('dealDeskPrep').classList.remove('visible');
-  document.getElementById('pushbackList').innerHTML = '';
-  document.getElementById('simulateBtnText').textContent = 'Simulate Deal Desk Review';
+  const el = document.getElementById('justificationText');
+  if (el) el.textContent = text || '';
+
+  const simBtn = document.getElementById('simulateBtn');
+  const simText = document.getElementById('simulateBtnText');
+  const prep = document.getElementById('dealDeskPrep');
+  if (simBtn) simBtn.disabled = false;
+  if (simText) simText.textContent = 'Simulate Deal Desk Review';
+  if (prep) prep.classList.remove('visible');
+
+  // Reset copy button
+  const copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.classList.remove('copied');
+    copyBtn.innerHTML = `
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
+      Copy`;
+  }
 }
 
-/* ── Copy Justification ───────────────────────────────────────────────────── */
+/* ── Copy Justification ─────────────────────────────────────────────────── */
 function copyJustification() {
-  const text = document.getElementById('justificationText').textContent;
+  const text = document.getElementById('justificationText')?.textContent;
+  if (!text) return;
+
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBtn');
+    if (!btn) return;
     btn.classList.add('copied');
     btn.innerHTML = `
-      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
       </svg>
-      Copied!`;
+      Copied`;
     setTimeout(() => {
       btn.classList.remove('copied');
       btn.innerHTML = `
-        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
         </svg>
-        Copy to clipboard`;
+        Copy`;
     }, 2000);
   });
 }
 
-/* ── Simulate Deal Desk Review ─────────────────────────────────────────────── */
+/* ── Simulate Deal Desk Review ─────────────────────────────────────────── */
 async function simulateDealDesk() {
   if (!currentResult) return;
 
   const btn = document.getElementById('simulateBtn');
   const btnText = document.getElementById('simulateBtnText');
 
-  btn.disabled = true;
-  btnText.textContent = 'Running simulation…';
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = 'Running simulation…';
 
   try {
     const response = await fetch('/api/simulate-review', {
@@ -360,57 +399,58 @@ async function simulateDealDesk() {
     });
 
     const data = await response.json();
-
     if (!response.ok) throw new Error(data.error || 'Simulation failed.');
 
     renderPushbackQuestions(data.questions);
   } catch (err) {
     alert('Simulation failed: ' + (err.message || 'Please try again.'));
   } finally {
-    btn.disabled = false;
-    btnText.textContent = 'Run Again';
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Run Again';
   }
 }
 
-/* ── Render Pushback Questions ─────────────────────────────────────────────── */
+/* ── Render Pushback Questions ─────────────────────────────────────────── */
 function renderPushbackQuestions(questions) {
-  if (!Array.isArray(questions) || questions.length === 0) return;
+  if (!Array.isArray(questions) || !questions.length) return;
 
   const prep = document.getElementById('dealDeskPrep');
   const list = document.getElementById('pushbackList');
+  if (!prep || !list) return;
 
   list.innerHTML = questions
     .map(
       (q, i) => `
       <div class="pushback-item">
-        <span class="pushback-num">Q${i + 1}</span>
-        <span>${escapeHtml(String(q))}</span>
+        <span class="pushback-num">${i + 1}</span>
+        <span class="pushback-text">${esc(String(q))}</span>
       </div>`
     )
     .join('');
 
   prep.classList.add('visible');
 
-  // Scroll to it on mobile
-  if (window.innerWidth <= 900) {
-    prep.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (window.innerWidth <= 860) {
+    document.querySelector('[data-tab="right"]')?.click();
+    setTimeout(() => prep.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
   }
 }
 
-/* ── Utilities ─────────────────────────────────────────────────────────────── */
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+function esc(str) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(str));
+  return d.innerHTML;
 }
 
-function formatNum(n) {
+function fmt(n) {
   if (typeof n !== 'number' || isNaN(n)) return '0';
-  if (n >= 1000) return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  return n.toFixed(2).replace(/\.00$/, '');
+  return n >= 1000
+    ? n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : n.toFixed(2).replace(/\.00$/, '');
 }
 
-// Add spinning CSS via JS (minimal)
-const style = document.createElement('style');
-style.textContent = `.spinning { animation: spin 0.8s linear infinite; }`;
-document.head.appendChild(style);
+/* ── Spinner keyframe (injected) ────────────────────────────────────────── */
+const s = document.createElement('style');
+s.textContent = `.spinning { animation: spin 0.7s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }`;
+document.head.appendChild(s);
